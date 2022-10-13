@@ -12,14 +12,14 @@ namespace Maths_Interpreter
     //Add Tokens here
     public class Tokens
     {
-        public int plus = 1;
-        public int subtract = 2;
-        public int multiplication = 3;
-        public int division = 4;
-        public int percentage = 5;
-        public int leftParenthesis = 6;
-        public int rightParenthesis = 7;
-        public int number = 8;
+        public string plus = "+";
+        public string subtract = "-";
+        public string multiplication = "*";
+        public string division = "/";
+        public string percentage = "%";
+        public string leftParenthesis = "(";
+        public string rightParenthesis = ")";
+        public string number = "Number";
 
     }
 
