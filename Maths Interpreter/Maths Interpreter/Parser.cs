@@ -8,7 +8,7 @@ namespace Maths_Interpreter
 {
     public class Parser
     {
-        public List<string> input;
+        public List<string> input,div;
         public int currentIndex = -1;
         public int isEnded = 0;
         public string res, currentchar;
@@ -39,9 +39,9 @@ namespace Maths_Interpreter
         {
             return this.input[this.currentIndex];
         }
-        public void RaiseError()
+        public string RaiseError()
         {
-            Console.WriteLine("Syntax Error");
+            return "Syntax Error";
         }
         public string Parse()
         {   if (this.CurrentValue() == "\0")
@@ -51,7 +51,7 @@ namespace Maths_Interpreter
         //storing the result of an expression
             res = this.Expression();
 
-            Console.WriteLine(this.CurrentValue());
+            //Console.WriteLine(this.CurrentValue());
             
             /*
             if (this.CurrentValue() != "\0")
@@ -63,25 +63,31 @@ namespace Maths_Interpreter
         public string Expression()
         {
             res = this.Term();
-          
-
-            this.currentchar = this.CurrentValue();
-            while (this.isEnded !=1 && (this.currentchar.Equals(T1.plus) || this.currentchar.Equals(T1.subtract)))
+            if (res.Contains("Syntax Error"))
+            {
+                return "Syntax Error";
+            }
+            else
+            {
+                this.currentchar = this.CurrentValue();
+                while (this.isEnded != 1 && (this.currentchar.Equals(T1.plus) || this.currentchar.Equals(T1.subtract)))
                 {
-                    
+
                     if (this.currentchar.Equals(T1.plus))
                     {
                         this.Next();
                         res = N1.AddNode(res, this.Term()); // for example -  add node 2 + 3
-                }
+                    }
                     else if ((this.currentchar.Equals(T1.subtract)))
                     {
                         this.Next();
                         res = N1.SubtractNode(res, this.Term());  // for example -  add node 2 - 3
-                }
+                    }
 
 
+
                 }
+            }
             
             return res;
         }
@@ -89,10 +95,14 @@ namespace Maths_Interpreter
         public string Term()
         {
             res = this.Factor();
-
-
+            if(res.Equals("Syntax Error"))
+            {
+                return "Syntax Error";
+            }
+            else
+            { 
             this.currentchar = this.CurrentValue();
-                while (this.isEnded != 1 && (this.currentchar.Equals(T1.multiplication) || this.currentchar.Equals(T1.division)))
+                while (this.isEnded != 1 && (this.currentchar.Equals(T1.multiplication) || this.currentchar.Equals(T1.division) || this.currentchar.Equals(T1.expo)))
                 {
 
                     if (this.currentchar.Equals(T1.multiplication))
@@ -103,58 +113,74 @@ namespace Maths_Interpreter
                     else if ((this.currentchar.Equals(T1.division)))
                     {
                         this.Next();
+                       
                         res = N1.DivideNode(res, this.Term()); // for example -  add node 2 / 3
-                }
+                    }
+                    else if ((this.currentchar.Equals(T1.expo)))
+                    {
+                        this.Next();
+                        res = N1.ExpononetNode(res, this.Term()); // for example -  add node 2 / 3
+                    }
 
 
                 }
-            
+            }
+
             return res;
 
         }
         //this function checks for number, left parenthesis then for the right parenthesis and then for single + or - operator
         public string Factor()
-        {
-            this.currentchar = this.CurrentValue();
 
-            if(currentchar.Equals(T1.leftParenthesis))
+        {   try
             {
-                this.Next();
-                res = this.Expression();
 
                 this.currentchar = this.CurrentValue();
-                if (!this.currentchar.Equals(T1.rightParenthesis))
-                {
-                    this.RaiseError();
-                }
-                this.Next();
-                return res;
-            }
-            
-            else if (this.currentchar.Contains(T1.number))
-                {
-                   this.Next();
 
-              
-                return N1.NumberNode(this.currentchar.Split(":")[1].Trim());
+                if (currentchar.Equals(T1.leftParenthesis))
+                {
+                    this.Next();
+                    res = this.Expression();
+
+                    this.currentchar = this.CurrentValue();
+                    if (!this.currentchar.Equals(T1.rightParenthesis))
+                    {
+                        return this.RaiseError();
+                    }
+                    this.Next();
+                    return res;
+                }
+
+                else if (this.currentchar.Contains(T1.number))
+                {
+                    this.Next();
+
+
+                    return N1.NumberNode(this.currentchar.Split(":")[1].Trim());
+
+                }
+                else if (this.currentchar.Equals(T1.plus))
+                {
+                    this.Next();
+
+
+                    return N1.AdditionNode(this.Factor()); ////to add node +2
+
+                }
+                else if (this.currentchar.Equals(T1.subtract))
+                {
+                    this.Next();
+
+                    return N1.SubtractionNode(this.Factor());//to add node -2
+                }
+                return this.RaiseError();
                 
             }
-            else if (this.currentchar.Equals(T1.plus))
+            catch(Exception e)
             {
-                this.Next();
-
-
-                return N1.AdditionNode(this.Factor()); ////to add node +2
-
+                Console.WriteLine("Invalid Expression");
+                return null;
             }
-            else if (this.currentchar.Equals(T1.subtract))
-            {
-                this.Next();
-
-                return N1.SubtractionNode(this.Factor());//to add node -2
-            }
-            this.RaiseError();
-            return null;
         }
 
     }

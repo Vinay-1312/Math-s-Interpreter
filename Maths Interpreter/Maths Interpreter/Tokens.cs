@@ -19,8 +19,10 @@ namespace Maths_Interpreter
         public string percentage = "%";
         public string leftParenthesis = "(";
         public string rightParenthesis = ")";
+        public string expo = "^";
         public string number = "Number";
-
+        public string assignment = "=";
+        public string varaible = "$";
     }
 
 }

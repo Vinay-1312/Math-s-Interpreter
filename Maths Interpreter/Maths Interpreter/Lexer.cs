@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Maths_Interpreter
@@ -14,8 +15,10 @@ namespace Maths_Interpreter
         private string input;
         private int currentIndex = -1;
         private char[] WHITESPACE = {' ','\n','\t',};
+        private string[] reservedWords = { "if", "while", "for", "foreach", "switch", "break", "continue", "else" };
         Tokens T1 = new Tokens();
-       public Lexer(string input)
+        List<string> tokens = new List<string>();
+        public Lexer(string input)
         {
             this.input = input;
             this.Next();
@@ -43,53 +46,89 @@ namespace Maths_Interpreter
 
         public List<string> GenerateTokens()
         {
-            List<string> tokens = new List<string>();
+            
             char currentCharacter = this.CurrentChar();
-            while(!currentCharacter.Equals('\0'))
+            while (!currentCharacter.Equals('\0'))
             {
                 currentCharacter = this.CurrentChar();
+                /*
+                if (this.input.Contains("="))
+                {
+                    string[] temp_string = this.input.Split("=");
+                    bool is_digit;
+                    double variableValue;
+                    if (temp_string.Length == 2)
+                    {
+                        is_digit = Double.TryParse(temp_string[1], out variableValue);
+                        if(Regex.IsMatch(temp_string[0], "^[a-zA-Z0-9 ]"))
+                        {
+                            Console.WriteLine("Varable Name can only contain alphanumeric characters and not a special character");
+                            return new List<string>();
+
+                        }
+                        if(is_digit==false)
+                        { 
+                            Console.WriteLine("Invalid Variable Value");
+                            return new List<string>();
+
+                        }
+                        if (reservedWords.Contains(temp_string[0]))
+                        {
+                            Console.WriteLine("Invalid Varaible: Variable name cannot be a reserved word");
+                            return new List<string>();
+                        }
+                        
+
+                    }
+
+                }*/
                 if (WHITESPACE.Contains(currentCharacter))
                 {
                     this.Next();
                 }
                 else if (Char.IsDigit(currentCharacter) | currentCharacter.Equals('.'))
                 {
-                    tokens.Add(T1.number.ToString() + ":" + GenerateNumbers().Trim());
+                    this.tokens.Add(T1.number.ToString() + ":" + GenerateNumbers().Trim());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('+'))
                 {
-                    tokens.Add(T1.plus.ToString());
+                    this.tokens.Add(T1.plus.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('-'))
                 {
-                    tokens.Add(T1.subtract.ToString());
+                    this.tokens.Add(T1.subtract.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('*'))
                 {
-                    tokens.Add(T1.multiplication.ToString());
+                    this.tokens.Add(T1.multiplication.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('/'))
                 {
-                    tokens.Add(T1.division.ToString());
+                    this.tokens.Add(T1.division.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('('))
                 {
-                    tokens.Add(T1.leftParenthesis.ToString());
+                    this.tokens.Add(T1.leftParenthesis.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals(')'))
                 {
-                    tokens.Add(T1.rightParenthesis.ToString());
+                    this.tokens.Add(T1.rightParenthesis.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('%'))
                 {
-                    tokens.Add(T1.percentage.ToString());
+                    this.tokens.Add(T1.percentage.ToString());
+                    this.Next();
+                }
+                else if (currentCharacter.Equals('^'))
+                {
+                    this.tokens.Add(T1.expo.ToString());
                     this.Next();
                 }
                 else if (currentCharacter.Equals('\n'))
@@ -100,16 +139,23 @@ namespace Maths_Interpreter
                 {
                     break;
                 }
+                
                 else
                 {
-                    
-                    Console.WriteLine("Invalid Expression");
-                    break;
+
+
+                    return new List<string>();
+
                 }
 
             }
       
-            return tokens;
+            return this.tokens;
+        }
+
+        public void createTokenList(Char currentChar)
+        {
+
         }
 
         //Generate numbers with multiple digits 

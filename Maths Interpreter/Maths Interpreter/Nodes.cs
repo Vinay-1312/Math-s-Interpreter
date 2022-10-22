@@ -40,7 +40,13 @@ namespace Maths_Interpreter
         {
             this.Node1 = Node1;
             this.Node2 = Node2;
-            return "("+this.Node1 + "/" + this.Node2+")";
+            return this.Node1 + "/" + this.Node2;
+        }
+        public string ExpononetNode(string Node1,string Node2)
+        {
+            this.Node1 = Node1;
+            this.Node2 = Node2;
+            return "(" + this.Node1 + "^" + this.Node2 + ")";
         }
         public string AdditionNode(string Node1)
         {
@@ -52,7 +58,8 @@ namespace Maths_Interpreter
         {
             this.Node1 = Node1;
 
-            return "("+"-" + this.Node1+")";
+            //  return "("+"-" + this.Node1+")";
+            return "(" + "~" + this.Node1 + ")";
         }
     }
 }
