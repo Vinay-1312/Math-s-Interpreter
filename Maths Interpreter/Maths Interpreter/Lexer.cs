@@ -14,10 +14,13 @@ namespace Maths_Interpreter
     {
         private string input;
         private int currentIndex = -1;
-        private char[] WHITESPACE = {' ','\n','\t',};
+        private char[] WHITESPACE = { ' ', '\n', '\t', };
         private string[] reservedWords = { "if", "while", "for", "foreach", "switch", "break", "continue", "else" };
+        private int equalityCheck = 0;
         Tokens T1 = new Tokens();
         List<string> tokens = new List<string>();
+        public string[] temp_string;
+        bool isValidExp;
         public Lexer(string input)
         {
             this.input = input;
@@ -33,60 +36,181 @@ namespace Maths_Interpreter
 
             }
             return '\0';
-           }
+        }
 
         //Go to the next character
         private void Next()
         {
-            if(this.currentIndex != this.input.Length)
+            if (this.currentIndex != this.input.Length)
             {
                 this.currentIndex = this.currentIndex + 1;
             }
         }
 
+        
+        public void checkAssignmentExpr()
+        {
+            if (this.input.Contains("="))
+            {
+                this.temp_string = this.input.Split("=");
+                if (this.temp_string.Length == 2)
+                {
+
+
+                    this.input = this.temp_string[1];
+                }
+                else
+                {
+
+                }
+            }
+
+        }
         public List<string> GenerateTokens()
         {
-            
+
             char currentCharacter = this.CurrentChar();
             while (!currentCharacter.Equals('\0'))
             {
                 currentCharacter = this.CurrentChar();
-                /*
-                if (this.input.Contains("="))
+                //Check for variable  assignment
+                if (this.input.Contains("->") && equalityCheck == 0)
                 {
-                    string[] temp_string = this.input.Split("=");
-                    bool is_digit;
-                    double variableValue;
-                    if (temp_string.Length == 2)
-                    {
-                        is_digit = Double.TryParse(temp_string[1], out variableValue);
-                        if(Regex.IsMatch(temp_string[0], "^[a-zA-Z0-9 ]"))
-                        {
-                            Console.WriteLine("Varable Name can only contain alphanumeric characters and not a special character");
-                            return new List<string>();
 
-                        }
-                        if(is_digit==false)
-                        { 
-                            Console.WriteLine("Invalid Variable Value");
-                            return new List<string>();
 
-                        }
-                        if (reservedWords.Contains(temp_string[0]))
-                        {
-                            Console.WriteLine("Invalid Varaible: Variable name cannot be a reserved word");
-                            return new List<string>();
-                        }
+
                         
+                        equalityCheck = 1;
+                        string[] temp_string = this.input.Split("->",2);
+                        bool is_digit;
+                        double variableValue;
+                        if (temp_string.Length == 2)
+                        {
+                            
+                            is_digit = Double.TryParse(temp_string[1], out variableValue);
+                            if (!Regex.IsMatch(temp_string[0], "[a-zA-Z0-9_]"))//check for special character in a string
+                            {
+                            //Console.WriteLine("Varable Name can only contain alphanumeric characters and not a special character");
+                            tokens.Add("Invalid Varaible: Varable Name can only contain alphanumeric characters and not a special character");
+                            return tokens;
+                        }
+                            if (is_digit == false)//if we assign expression to a variable
+                            {
+                                //Console.WriteLine("Invalid Variable Value");
+                                //return new List<string>();
+                                this.input = temp_string[1].Trim();
+                                tokens.Add(T1.variable + ":" + temp_string[0].Trim());
+                                tokens.Add(T1.assignment);
+                                continue;
 
+                            }
+                            if (reservedWords.Contains(temp_string[0]))//check for  reserved words
+                            {
+                            //Console.WriteLine("Invalid Varaible: Variable name cannot be a reserved word");
+                            tokens.Add("Invalid Varaible: Variable name cannot be a reserved word");
+                            return tokens;
+                        }
+                            
+                            if (Char.IsDigit(temp_string[0][0]))
+                            {
+                                //Console.WriteLine("Invalid Varaible: Variable name cannot begin with a number");
+                            tokens.Add("Invalid Varaible: Variable name cannot begin with a number");
+                            return tokens;
+                            }
+                            tokens.Add(T1.variable + ":" + temp_string[0].Trim());
+                            tokens.Add(T1.assignment);
+                            tokens.Add(T1.number + ":" + temp_string[1]);
+                            //Lexer.variablesStored.Add(temp_string[0], temp_string[1]);
+                            break;
+                        }
                     }
+                
 
-                }*/
-                if (WHITESPACE.Contains(currentCharacter))
+                else if(currentCharacter.Equals('<'))
+                {
+                    this.Next();
+                    Char currentchar = this.CurrentChar();
+                    if(currentchar.Equals('='))
+                    {
+                        this.tokens.Add(T1.lessThanOrEqual.ToString());
+                        this.Next();
+                        continue;
+                    }
+                    /*
+                    else if (WHITESPACE.Contains(currentCharacter))
+                    {
+                        this.Next();
+                        currentchar = this.CurrentChar();
+                        if(currentchar.Equals('='))
+                        {
+                            this.tokens.Add(T1.lessThanOrEqual.ToString());
+                            this.Next();
+                            continue;
+                        }
+                    }
+                    */
+                        this.tokens.Add(T1.lessThan.ToString());
+                        //this.Next();
+
+                    
+
+                }
+                else if (currentCharacter.Equals('>'))
+                {
+                    this.Next();
+                    Char currentchar = this.CurrentChar();
+                    if (currentchar.Equals('='))
+                    {
+                        this.tokens.Add(T1.greaterThanOrEqual.ToString());
+                        this.Next();
+                        continue;
+                    }
+                    /*
+                    else if (WHITESPACE.Contains(currentCharacter))
+                    {
+                        this.Next();
+                        currentchar = this.CurrentChar();
+                        if (currentchar.Equals('='))
+                        {
+                            this.tokens.Add(T1.greaterThanOrEqual.ToString());
+                            this.Next();
+                            continue;
+                        }
+                    }
+                    */
+                    this.tokens.Add(T1.greaterThan.ToString());
+                    //this.Next();
+                }
+                else if (currentCharacter.Equals('='))
+                {
+                    this.Next();
+                    Char currentchar = this.CurrentChar();
+                    if (currentchar.Equals('='))
+                    {
+                        this.tokens.Add(T1.equality.ToString());
+                        this.Next();
+                        continue;
+                    }
+                    /*
+                    else if (WHITESPACE.Contains(currentCharacter))
+                    {
+                        this.Next();
+                        currentchar = this.CurrentChar();
+                        if (currentchar.Equals(T1.assignment))
+                        {
+                            this.tokens.Add(T1.equality.ToString());
+                            this.Next();
+                            continue;
+                        }
+                    }
+                    */
+                }
+
+                else if (WHITESPACE.Contains(currentCharacter))
                 {
                     this.Next();
                 }
-                else if (Char.IsDigit(currentCharacter) | currentCharacter.Equals('.'))
+                else if (Char.IsDigit(currentCharacter) || currentCharacter.Equals('.'))
                 {
                     this.tokens.Add(T1.number.ToString() + ":" + GenerateNumbers().Trim());
                     this.Next();
@@ -139,6 +263,35 @@ namespace Maths_Interpreter
                 {
                     break;
                 }
+                /*
+                else if(Interpreter.variablesStored.ContainsKey(this.input))//check if variable exist or not 
+                {
+                    tokens.Add(T1.variable + ":" + this.input);
+                    break;
+                }
+                */
+                else if (Char.IsLetter(currentCharacter)  || currentCharacter.Equals('_'))//check if variable exist or not 
+                { string variableStr = this.CurrentChar().ToString();
+                    this.Next();
+                    Char currentChar = this.CurrentChar();
+                    while (!currentChar.Equals(' ') & (( Char.IsLetterOrDigit(currentChar)) || currentChar.Equals('_')))
+                        {
+                        variableStr = variableStr + currentChar;
+                        this.Next();
+                        currentChar = this.CurrentChar();
+                    }
+                    //this.currentIndex = this.currentIndex - 1;
+                    if(Interpreter.variablesStored.ContainsKey(variableStr))
+                    {
+                        tokens.Add(T1.variable + ":" + variableStr);
+                    }
+                    else
+                    {
+                        tokens.Clear();
+                        tokens.Add("Undefined Token:" + variableStr);
+                        break;
+                    }
+                }
                 
                 else
                 {
@@ -149,47 +302,46 @@ namespace Maths_Interpreter
                 }
 
             }
-      
+
             return this.tokens;
         }
 
-        public void createTokenList(Char currentChar)
-        {
 
-        }
 
         //Generate numbers with multiple digits 
         public string GenerateNumbers()
-        {   int decimalPointCnt = 0;
-            var numberStr = this.CurrentChar().ToString();
-            this.Next();
-            var currentChar = this.CurrentChar();
-
-            while (!currentChar.Equals(' ') & (currentChar.Equals('.') | Char.IsDigit(currentChar)))
-            {
-                
-                if (currentChar.Equals('.'))
-                {
-                    decimalPointCnt += 1;
-                }
-                if (decimalPointCnt > 1)
-                    break;
-                numberStr += currentChar;
-                
+            { int decimalPointCnt = 0;
+                var numberStr = this.CurrentChar().ToString();
                 this.Next();
-                currentChar = this.CurrentChar();
+                var currentChar = this.CurrentChar();
+
+                while (!currentChar.Equals(' ') & (currentChar.Equals('.') | Char.IsDigit(currentChar)))
+                {
+
+                    if (currentChar.Equals('.'))
+                    {
+                        decimalPointCnt += 1;
+                    }
+                    if (decimalPointCnt > 1)
+                        break;
+                    numberStr += currentChar;
+
+                    this.Next();
+                    currentChar = this.CurrentChar();
+                }
+                if (numberStr.StartsWith('.'))
+                    numberStr = "0" + numberStr;
+                if (numberStr.EndsWith('.'))
+                    numberStr = numberStr + "0";
+                // Console.WriteLine(this.CurrentChar());
+                //Decrement current index by 1 to avoid 2222+ scenario 
+                this.currentIndex = this.currentIndex - 1;
+                return numberStr;
             }
-            if (numberStr.StartsWith('.'))
-                numberStr = "0" + numberStr;
-            if (numberStr.EndsWith('.'))
-                numberStr = numberStr + "0";
-// Console.WriteLine(this.CurrentChar());
-           //Decrement current index by 1 to avoid 2222+ scenario 
-            this.currentIndex = this.currentIndex - 1;
-            return numberStr;
         }
     }
-}
+
+
 
 /*
  Notes:
